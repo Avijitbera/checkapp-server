@@ -3,3 +3,4 @@ node_modules
 .env
 appinsight-admin.json
 .token
+deno.json
