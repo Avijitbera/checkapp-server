@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["deno"]
+  output          = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum LoginWith {
+  google
+  facebook
+  twitter
+  apple
+}
+
+model Profile {
+  id Int @id @default(autoincrement())
+  uid String @db.VarChar(100) @unique
+  name String @db.VarChar(180)
+  image String @db.Text
+  loginWith LoginWith @default(google)
+  createdAt DateTime @db.Timestamptz() @default(now())
+  reviews AppReview[]
+  tags AppTags[]
+}
+
+model Application {
+  id Int @id @default(autoincrement())
+  appId String @db.Text @unique
+  appUrl String @db.Text
+  title String @db.VarChar(120)
+  icon String @db.Text
+  minInstalls Int
+  maxInstalls Int
+  score Int
+  ratings Int
+  reviews Int
+  price Int
+  free Boolean
+  developer String @db.VarChar(100)
+  isAndroid Boolean @default(true)
+  usage_rating Int @default(5)
+  tags AppTags[]
+
+}
+
+model AppReview {
+  id Int @id @default(autoincrement())
+  appId String @db.Text
+  reviewId String @db.VarChar(100) @unique
+  uid String @db.VarChar(100)
+  message String? @db.Text
+  rating Int @default(5)
+  type String? @db.Text
+  createAt DateTime @db.Timestamptz() @default(now())
+  updatedAt DateTime @db.Timestamptz() @default(now())
+  profile Profile @relation(fields: [uid], references: [uid])
+}
+
+model AppTags {
+  id Int @id @default(autoincrement())
+  tagId String @db.VarChar(100) @unique
+  appId String @db.Text
+  uid String @db.VarChar(100)
+  tags Tags @relation(fields: [tagId], references: [tagId])
+  apps Application @relation(fields: [appId], references: [appId])
+  profile Profile @relation(references: [uid], fields: [uid])
+}
+
+model Tags {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  tagId String @db.VarChar(100) @unique
+  appTags AppTags[]
+}
